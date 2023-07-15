@@ -1,8 +1,5 @@
 version: 2.1
 
-orbs: 
-  slack: circleci/slack@4.12.5
-
 # commands:
 #   destroy-environment:
 #     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -111,13 +108,9 @@ jobs:
             cd frontend
             npm install
             npm audit fix --audit-level=critical --force
+            npm update loader-utils --depth 2
+            npm update minimist --depth 4
             npm audit --audit-level=critical
-            echo "export SHA1_SHORT=${CIRCLE_SHA1:0:7}" >> $BASH_ENV
-            echo "export COMMIT_MSG='$(git log -1 HEAD --pretty=format:%s | sed s/\'/\\\\\'/g)'" >> $BASH_ENV
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: always
-          template: basic_fail_1
 
   scan-backend:
     docker:
@@ -134,10 +127,6 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm update mkdirp --depth 2
             npm audit --audit-level=critical
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: always
-          template: basic_fail_1
 
 #   deploy-infrastructure:
 #     docker:
