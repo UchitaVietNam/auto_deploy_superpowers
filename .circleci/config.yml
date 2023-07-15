@@ -114,6 +114,8 @@ jobs:
             npm update loader-utils --depth 2
             npm update minimist --depth 4
             npm audit --audit-level=critical
+            echo "export SHA1_SHORT=${CIRCLE_SHA1:0:7}" >> $BASH_ENV
+            echo "export COMMIT_MSG='$(git log -1 HEAD --pretty=format:%s | sed s/\'/\\\\\'/g)'" >> $BASH_ENV
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: always
