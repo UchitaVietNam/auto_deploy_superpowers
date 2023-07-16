@@ -15,7 +15,7 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            echo "Destroying environment: << parameters.Workflow_ID >> "
+          "Destroying environment: << parameters.Workflow_ID >> "
             aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
             aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.Workflow_ID >>
             aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.Workflow_ID >>
@@ -164,7 +164,7 @@ jobs:
           name: Add back-end ip to ansible inventory
           command: |
             BACKEND_PUBLIC_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query 'Reservations[*].Instances[*].PublicDnsName' --output text)
-            echo $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.txt
+          $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.txt
             cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
@@ -175,6 +175,19 @@ jobs:
   configure-infrastructure:
     docker:
       - image: python:3.7-alpine3.11
+        environment:
+          NODE_ENV: "production"
+          VERSION: "1"
+          ENVIRONMENT: "production"
+          TYPEORM_CONNECTION: $TYPEORM_CONNECTION
+          TYPEORM_MIGRATIONS: $TYPEORM_MIGRATIONS
+          TYPEORM_MIGRATIONS_DIR: $TYPEORM_MIGRATIONS_DIR
+          TYPEORM_ENTITIES: $TYPEORM_ENTITIES
+          TYPEORM_PORT: $TYPEORM_PORT  
+          TYPEORM_HOST: $TYPEORM_HOST    
+          TYPEORM_USERNAME: $TYPEORM_USERNAME            
+          TYPEORM_PASSWORD: $TYPEORM_PASSWORD      
+          TYPEORM_DATABASE: $TYPEORM_DATABASE     
     steps:
       - checkout
       - add_ssh_keys:
@@ -184,25 +197,17 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update tar gzip ansible
-            pip install awscli
+            apk add curl
+            apk add --update tar gzip ansible bash
+            apk add openssh-client
+            pip3 install awscli
       - run:
           name: Configure server
           command: |
             cat ./.circleci/ansible/inventory.txt
             export ANSIBLE_HOST_KEY_CHECKING=False
             export RECORD_HOST_KEYS=False
-            export ANSIBLE_PARAMIKO_BANNER_TIMEOUT=30   
-            echo ENVIROMENT=production > "backend/.env"      
-            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
-            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
-            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"          
-            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"      
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"            
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"      
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"     
-            echo "CONTENT OF backend/.env"      
-            cat backend/.env         
+            export ANSIBLE_PARAMIKO_BANNER_TIMEOUT=30
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml -v
       - destroy-environment
@@ -238,7 +243,7 @@ jobs:
 #           command: |
 #             # your code here
 #             export API_URL="http://${BACKEND_IP}:3030"
-#             echo "${API_URL}"
+#           "${API_URL}"
 #       - run:
 #           name: Deploy frontend objects
 #           command: |
