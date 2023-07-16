@@ -1,13 +1,13 @@
 ---
 
 - name: extract artifact
-  become: yes
+  become: true
   unarchive:
     src: files/artifact.tar.gz
     dest: /home/ec2-user
     
 - name: start app
-  become: yes
+  become: true
   shell: |
     cd /home/ec2-user
     npm install
@@ -26,15 +26,3 @@
     TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE')}}"
     TYPEORM_MIGRATIONS: "{{ lookup('env', 'TYPEORM_MIGRATIONS')}}"
     TYPEORM_MIGRATIONS_DIR: "{{ lookup('env', 'TYPEORM_MIGRATIONS_DIR')}}"
-    
-# - name: "Set pm2 start as service"
-#   become: yes
-#   shell: |
-#     env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu
-
-# - name: check pm2 status
-#   become: yes
-#   shell: |
-#     pm2 describe "udapeople-backend"
-#   register: command_output_npm
-# - debug: var=command_output_npm.stdout_lines
