@@ -21,14 +21,14 @@
     #     name: "python3-pip"
     #     update_cache: yes
     #     state: present
-    - name: Update yum packages
+    - name: Update dnf packages
       become: true
-      yum:
+      dnf:
         name: '*'
         state: latest
     - name: Install Python 3
       become: true
-      yum:
+      dnf:
         name: python3
         state: present
     - name: 'Wait port 22 to become reachable/usable.'
