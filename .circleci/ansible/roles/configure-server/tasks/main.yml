@@ -6,12 +6,12 @@
 
 - name: "Remove dependencies that are no longer required"
   become: true
-  apt:
+  dnf:
     autoremove: yes
 
 - name: "Install npm and nodejs"
   become: true
-  apt:
+  dnf:
     name: ["npm", "nodejs"]
     state: latest
     update_cache: yes
