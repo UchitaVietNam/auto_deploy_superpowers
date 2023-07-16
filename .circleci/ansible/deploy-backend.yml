@@ -8,10 +8,6 @@
     - ansible_python_interpreter: /usr/bin/python3
     - ansible_host_key_checking: false
     - ansible_stdout_callback: yaml
-  # pre_tasks:
-  #   - name: Loading environment variables
-  #     tags: always
-  #     set_fact:
   environment:
     NODE_ENV: "{{ lookup('env','NODE_ENV') }}"
     VERSION: "{{ lookup('env','VERSION') }}"

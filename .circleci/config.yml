@@ -22,6 +22,7 @@ commands:
           command: |
             sudo add-apt-repository --yes --update ppa:ansible/ansible
             sudo apt install ansible
+
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -43,20 +44,20 @@ commands:
     parameters:
       Workflow_ID:
         type: string
-        default: ${CIRCLE_WORKFLOW_ID:0:7}    
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
     steps:
       - run:
           name: Revert migrations
           when: on_fail
           command: |
-              SUCCESS=$(curl --insecure  https://kvdb.io/${KVDB_BUCKET_ID}/migration_<< parameters.Workflow_ID >>)
-              # Logic for reverting the database state
-              if (( $SUCCESS == 1 ));
-              then
-                cd ~/project/backend
-                npm install
-                npm run migration:revert
-              fi
+            SUCCESS=$(curl --insecure  https://kvdb.io/${KVDB_BUCKET_ID}/migration_<< parameters.Workflow_ID >>)
+            # Logic for reverting the database state
+            if (( $SUCCESS == 1 ));
+            then
+              cd ~/project/backend
+              npm install
+              npm run migration:revert
+            fi
 
 jobs:
   build-frontend:
@@ -202,11 +203,11 @@ jobs:
           TYPEORM_MIGRATIONS: $TYPEORM_MIGRATIONS
           TYPEORM_MIGRATIONS_DIR: $TYPEORM_MIGRATIONS_DIR
           TYPEORM_ENTITIES: $TYPEORM_ENTITIES
-          TYPEORM_PORT: $TYPEORM_PORT  
-          TYPEORM_HOST: $TYPEORM_HOST    
-          TYPEORM_USERNAME: $TYPEORM_USERNAME            
-          TYPEORM_PASSWORD: $TYPEORM_PASSWORD      
-          TYPEORM_DATABASE: $TYPEORM_DATABASE     
+          TYPEORM_PORT: $TYPEORM_PORT
+          TYPEORM_HOST: $TYPEORM_HOST
+          TYPEORM_USERNAME: $TYPEORM_USERNAME
+          TYPEORM_PASSWORD: $TYPEORM_PASSWORD
+          TYPEORM_DATABASE: $TYPEORM_DATABASE
     steps:
       - checkout
       - add_ssh_keys:
@@ -250,7 +251,7 @@ jobs:
                 curl --insecure https://kvdb.io/${KVDB_BUCKET_ID}/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
       - destroy-environment
-      - revert-migrations   
+      - revert-migrations
 
   deploy-frontend:
     docker:
@@ -263,9 +264,9 @@ jobs:
       - run:
           name: Get backend url
           command: |
-             BACKEND_IP=$(aws cloudformation describe-stacks --stack-name udapeople-backend-"${CIRCLE_WORKFLOW_ID:0:7}" --query "Stacks[0].Outputs[0].OutputValue" --output text)
-             API_URL="http://${BACKEND_IP}:3030"
-             echo "API_URL=${API_URL}" >> frontend/.env
+            BACKEND_IP=$(aws cloudformation describe-stacks --stack-name udapeople-backend-"${CIRCLE_WORKFLOW_ID:0:7}" --query "Stacks[0].Outputs[0].OutputValue" --output text)
+            API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL=${API_URL}" >> frontend/.env
       - run:
           name: Deploy frontend objects
           working_directory: ./frontend
@@ -288,10 +289,10 @@ jobs:
           TYPEORM_MIGRATIONS: $TYPEORM_MIGRATIONS
           TYPEORM_MIGRATIONS_DIR: $TYPEORM_MIGRATIONS_DIR
           TYPEORM_ENTITIES: $TYPEORM_ENTITIES
-          TYPEORM_PORT: $TYPEORM_PORT  
-          TYPEORM_HOST: $TYPEORM_HOST    
-          TYPEORM_USERNAME: $TYPEORM_USERNAME            
-          TYPEORM_PASSWORD: $TYPEORM_PASSWORD      
+          TYPEORM_PORT: $TYPEORM_PORT
+          TYPEORM_HOST: $TYPEORM_HOST
+          TYPEORM_USERNAME: $TYPEORM_USERNAME
+          TYPEORM_PASSWORD: $TYPEORM_PASSWORD
           TYPEORM_DATABASE: $TYPEORM_DATABASE
     steps:
       - checkout
@@ -367,8 +368,8 @@ jobs:
             else
               exit 1
             fi
-      - destroy-environment  
-      - revert-migrations
+      # - destroy-environment
+      # - revert-migrations
 
   cloudfront-update:
     docker:
@@ -389,32 +390,30 @@ jobs:
                     --stack-name InitialStack \
                     --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
                     --tags project=udapeople
-            
       - revert-migrations
       - destroy-environment
 
 cleanup:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - checkout
-      - run:
-          name: Get old stack workflow id and Cleanup
-          command: |           
-            export OldWorkflowID=$(curl --insecure https://kvdb.io/${KVDB_BUCKET_ID}/old_workflow_id)
-            export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
-            echo OldWorkflowID: "${OldWorkflowID}"
-            echo CIRCLE_WORKFLOW_ID "$CIRCLE_WORKFLOW_ID"
-            echo Stack names: "${STACKS[@]}"
-            if [[ ${STACKS[@]} =~ "${OldWorkflowID}" ]]
-            then
-              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
-              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
-              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
-              echo "=======================Delete Confirmed========================"
-            else
-              echo "=======================Didn't delete========================"            
-            fi
+  docker:
+    - image: amazon/aws-cli
+  steps:
+    - checkout
+    - run:
+        name: Get old stack workflow id and Cleanup
+        command: |
+          export OldWorkflowID=$(curl --insecure https://kvdb.io/${KVDB_BUCKET_ID}/old_workflow_id)
+          export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
+          echo OldWorkflowID: "${OldWorkflowID}"
+          echo CIRCLE_WORKFLOW_ID "$CIRCLE_WORKFLOW_ID"
+          echo Stack names: "${STACKS[@]}"
+          if [[ ${STACKS[@]} =~ "${OldWorkflowID}" ]]
+          then
+            aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+            aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
+            aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
+          else
+            echo "Did not delete stack"            
+          fi
 
 workflows:
   default:
@@ -444,7 +443,7 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
-      # - cloudfront-update:
-      #     requires: [smoke-test]
-      # - cleanup:
-      #     requires: [cloudfront-update]
+      - cloudfront-update:
+          requires: [smoke-test]
+      - cleanup:
+          requires: [cloudfront-update]
