@@ -301,10 +301,10 @@ jobs:
           at: ~/
       - restore_cache:
           keys: [backend-build]
-    - run:
-        name: Install TypeScript
-        command: |
-          npm install -g typescript
+      - run:
+          name: Install TypeScript
+          command: |
+            npm install -g typescript
       - run:
           name: Install aws dependencies
           command: |
