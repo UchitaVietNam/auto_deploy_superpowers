@@ -300,6 +300,9 @@ jobs:
           fingerprints: ["fa:b2:9c:87:44:8a:52:b7:34:58:6c:cd:71:ca:d4:cb"]
       - attach_workspace:
           at: ~/
+      - restore_cache:
+          keys:
+            - build-backend
       - run:
           name: Install aws dependencies
           command: |
@@ -316,17 +319,14 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            # your code here
             cd backend
             npm install
             npm run build
             cd ..
-            # Zip the directory
             tar -C backend -czvf artifact.tar.gz .
             mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
             mv artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
             cd .circleci/ansible
-            echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml -v
       - revert-migrations
