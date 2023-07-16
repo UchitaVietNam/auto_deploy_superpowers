@@ -258,8 +258,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys:
-            - build-frontend
+          keys: [frontend-build]
       - dependencies
       - run:
           name: Get backend url
@@ -301,8 +300,11 @@ jobs:
       - attach_workspace:
           at: ~/
       - restore_cache:
-          keys:
-            - build-backend
+          keys: [backend-build]
+    - run:
+        name: Install TypeScript
+        command: |
+          npm install -g typescript
       - run:
           name: Install aws dependencies
           command: |
