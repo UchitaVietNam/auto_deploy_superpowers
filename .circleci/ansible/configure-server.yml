@@ -22,12 +22,12 @@
     #     update_cache: yes
     #     state: present
     - name: Update yum packages
-      become: yes
+      become: true
       yum:
         name: '*'
         state: latest
     - name: Install Python 3
-      become: yes
+      become: true
       yum:
         name: python3
         state: present
