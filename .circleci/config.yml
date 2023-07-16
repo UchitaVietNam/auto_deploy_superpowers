@@ -275,6 +275,7 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm update loader-utils --depth 2
             npm update minimist --depth 4
+            npm audit --audit-level=critical
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist "s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}" --recursive
@@ -326,6 +327,7 @@ jobs:
             npm install
             npm audit fix --audit-level=critical --force
             npm update mkdirp --depth 2
+            npm audit --audit-level=critical
             npm run build
             cd ..
             # Zip the directory
