@@ -5,12 +5,17 @@
   unarchive:
     src: files/artifact.tar.gz
     dest: /home/ec2-user
+
+- name: install
+  become: true
+  shell: |
+    cd /home/ec2-user
+    npm install
     
 - name: start app
   become: true
   shell: |
     cd /home/ec2-user
-    npm install
     pm2 stop default
     pm2 start npm -- start
   environment:
