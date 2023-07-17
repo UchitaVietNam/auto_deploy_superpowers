@@ -1,2 +1,2 @@
 https://github.com/UchitaVietNam/auto_deploy_superpowers.git
-http://udapeople-b39fb22.s3-website-us-east-1.amazonaws.com/#/employees
+http://udapeople-e4059ca.s3-website-us-east-1.amazonaws.com
