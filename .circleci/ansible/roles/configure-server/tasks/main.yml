@@ -1,0 +1,36 @@
+---
+- name: "Update dnf packages"
+  become: true
+  dnf:
+    update_cache: yes
+
+- name: "Remove dependencies that are no longer required"
+  become: true
+  dnf:
+    autoremove: yes
+
+- name: "Install npm and nodejs"
+  become: true
+  dnf:
+    name: ["npm", "nodejs"]
+    state: latest
+    update_cache: yes
+
+- name: "install n"
+  become: true
+  npm:
+    name: n
+    global: yes
+    production: yes
+
+- name: "install nodejs 12.20.1"
+  become: true
+  shell: n 12.20.1
+
+- name: "Install pm2"
+  become: true
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
