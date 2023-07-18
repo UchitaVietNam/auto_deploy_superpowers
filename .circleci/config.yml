@@ -250,6 +250,9 @@ jobs:
             then
               cat ~/project/backend/migrations_dump.txt
               curl --insecure https://kvdb.io/${KVDB_BUCKET_ID}/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+            else
+              cat ~/project/backend/migrations_dump.txt
+              curl --insecure https://kvdb.io/${KVDB_BUCKET_ID}/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '0'
             fi
       - destroy-environment
       - revert-migrations
